@@ -18,7 +18,9 @@ export const createOutreach = async (req, res) => {
       status
     } = req.body;
 
-    const image_url = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
+let image_url = req.file
+  ? `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}`
+  : null;
 
     const outreach = await Outreach.create({
       title,
@@ -61,9 +63,13 @@ export const updateOutreach = async (req, res) => {
     const item = await Outreach.findByPk(req.params.id);
     if (!item) return res.status(404).json({ message: 'Not found' });
 
-    const image_url = req.file
-      ? `/${req.file.path.replace(/\\/g, '/')}`
-      : req.body.image_url || item.image_url;
+    let image_url = item.image_url;
+    if (req.file) {
+      image_url = `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}`;
+    } else if (req.body.image_url) {
+      image_url = req.body.image_url;
+    }
+    
 
     await item.update({
       ...req.body,
