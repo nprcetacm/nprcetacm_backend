@@ -22,7 +22,7 @@ const app = express();
 app.use(cors({
   origin: 'https://nprcet.acm.org',
   credentials: true
-}));
+})) ;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(`/${UPLOAD_DIR}`, express.static(path.join(__dirname, '..', UPLOAD_DIR)));
