@@ -19,7 +19,10 @@ const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://nprcet.acm.org',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(`/${UPLOAD_DIR}`, express.static(path.join(__dirname, '..', UPLOAD_DIR)));
@@ -39,29 +42,30 @@ const PORT = process.env.PORT || 5000;
   try {
     await sequelize.authenticate();
     await sequelize.sync({ alter: true });
-    console.log("✅ Database connected and synced");
+    console.log("Database connected and synced");
 
     // Debug: how many admins exist?
     const count = await Admin.count();
-    console.log("👤 Admin count in DB:", count);
+    console.log("Admin count in DB:", count);
 
     if (count === 0) {
       const bcrypt = await import('bcryptjs');
 
-      const defaultUser = process.env.DEFAULT_ADMIN_USER;
-      const defaultPass = process.env.DEFAULT_ADMIN_PASS;
+     const defaultUser = process.env.DEFAULT_ADMIN_USER || 'admin';
+     const defaultPass = process.env.DEFAULT_ADMIN_PASS || 'admin123';
+
 
       const hashed = await bcrypt.hash(defaultPass, 10);
       await Admin.create({ username: defaultUser, password: hashed });
 
-      console.log(`✅ Seeded default admin: ${defaultUser} / ${defaultPass}`);
+      console.log(`Seeded default admin: ${defaultUser}`);
     } else {
-      console.log("ℹ️ Admin already exists, skipping seed.");
+      console.log("Admin already exists, skipping seed.");
     }
 
-    app.listen(PORT, () => console.log(`🚀 Server listening on ${PORT}`));
+    app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
   } catch (err) {
-    console.error("❌ Server/DB error:", err);
+    console.error("Server/DB error:", err);
   }
 })();
 
