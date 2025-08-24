@@ -39,19 +39,29 @@ const PORT = process.env.PORT || 5000;
   try {
     await sequelize.authenticate();
     await sequelize.sync({ alter: true });
+    console.log("✅ Database connected and synced");
 
-    // seed admin if not exists - use bcrypt hash from code below
-    const existing = await Admin.findOne();
-    if(!existing) {
-      // default admin: admin / admin123  (change immediately)
+    // Debug: how many admins exist?
+    const count = await Admin.count();
+    console.log("👤 Admin count in DB:", count);
+
+    if (count === 0) {
       const bcrypt = await import('bcryptjs');
-      const hashed = await bcrypt.hash('admin123', 10);
-      await Admin.create({ username: 'admin', password: hashed });
-      console.log('Created default admin: admin / admin123');
+
+      const defaultUser = process.env.DEFAULT_ADMIN_USER;
+      const defaultPass = process.env.DEFAULT_ADMIN_PASS;
+
+      const hashed = await bcrypt.hash(defaultPass, 10);
+      await Admin.create({ username: defaultUser, password: hashed });
+
+      console.log(`✅ Seeded default admin: ${defaultUser} / ${defaultPass}`);
+    } else {
+      console.log("ℹ️ Admin already exists, skipping seed.");
     }
 
-    app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 Server listening on ${PORT}`));
   } catch (err) {
-    console.error('Server/DB error', err);
+    console.error("❌ Server/DB error:", err);
   }
 })();
+
