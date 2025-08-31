@@ -20,7 +20,8 @@ const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
 
 const app = express();
 app.use(cors({
-  origin: 'https://nprcet.acm.org',
+  // origin: 'https://nprcet.acm.org',
+  origin: process.env.ORIGIN,
   credentials: true
 })) ;
 app.use(express.json());
